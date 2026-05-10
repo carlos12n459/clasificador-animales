@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clasificador de Animales · Zoo UCI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+    <header>
+      <div class="logo-box">&#x1F981;</div>
+      <div>
+        <h1>Clasificador de Animales</h1>
+        <p>Regresi&oacute;n Log&iacute;stica &amp; Red Neuronal (RandomizedSearchCV) &middot; Dataset Zoo UCI &middot; 101 animales</p>
+      </div>
+    </header>
+    <div class="chip-bar">
+      <span class="chip c1">T1 &middot; Mam&iacute;feros</span>
+      <span class="chip c2">T2 &middot; Aves</span>
+      <span class="chip c3">T3 &middot; Reptiles</span>
+      <span class="chip c4">T4 &middot; Peces</span>
+      <span class="chip c5">T5 &middot; Anfibios</span>
+      <span class="chip c6">T6 &middot; Insectos</span>
+      <span class="chip c7">T7 &middot; Invertebrados</span>
+    </div>
+    <nav class="nav-tabs">
+      <button class="tab-btn active" onclick="switchTab('ind',this)">&#x1F52C; Predicci&oacute;n Individual</button>
+      <button class="tab-btn" onclick="switchTab('lot',this)">&#x1F4CA; Predicci&oacute;n por Lotes</button>
+    </nav>
+    <main>
+      <section id="tab-ind" class="tab-panel active">
+        <div class="model-sel">
+          <label>Modelo:</label>
+          <button class="mbtn active" onclick="setModel('logistic',this)">Regresi&oacute;n Log&iacute;stica</button>
+          <button class="mbtn" onclick="setModel('neural',this)">Red Neuronal MLP</button>
+        </div>
+        <div class="params-box">
+          <strong>&#x1F527; Mejores hiperpar&aacute;metros &mdash; RandomizedSearchCV</strong>
+          solver: 'adam' &nbsp;&middot;&nbsp; hidden_layer_sizes: (64, 32) &nbsp;&middot;&nbsp; alpha: 0.001 &nbsp;&middot;&nbsp; activation: 'tanh'
+        </div>
+        <h2 class="sec-title">Caracter&iacute;sticas del animal</h2>
+        <div class="tog-grid">
+          <div class="tog-field"><span>Tiene pelo</span>
+          <label class="tog"><div class="sw"><input type="checkbox" id="f-hair"><span class="sw-track"></span></div><span class="tog-lbl">&iquest;Tiene pelo?</span></label>
+        </div>
+        <div class="tog-field"><span>Pone huevos</span>
+        <label class="tog"><div class="sw"><input type="checkbox" id="f-eggs"><span class="sw-track"></span></div><span class="tog-lbl">&iquest;Pone huevos?</span></label>
+      </div>
+      <div class="tog-field"><span>Produce leche</span>
+      <label class="tog"><div class="sw"><input type="checkbox" id="f-milk"><span class="sw-track"></span></div><span class="tog-lbl">&iquest;Produce leche?</span></label>
+    </div>
+    <div class="tog-field"><span>Acu&aacute;tico</span>
+    <label class="tog"><div class="sw"><input type="checkbox" id="f-aquatic"><span class="sw-track"></span></div><span class="tog-lbl">&iquest;Vive en el agua?</span></label>
+  </div>
+  <div class="tog-field"><span>Tiene dientes</span>
+  <label class="tog"><div class="sw"><input type="checkbox" id="f-toothed"><span class="sw-track"></span></div><span class="tog-lbl">&iquest;Tiene dientes?</span></label>
+</div>
+<div class="tog-field"><span>Tiene plumas</span>
+<label class="tog"><div class="sw"><input type="checkbox" id="f-feathers"><span class="sw-track"></span></div><span class="tog-lbl">&iquest;Tiene plumas?</span></label>
+</div>
+<div class="tog-field"><span>Tiene aletas</span>
+<label class="tog"><div class="sw"><input type="checkbox" id="f-fins"><span class="sw-track"></span></div><span class="tog-lbl">&iquest;Tiene aletas?</span></label>
+</div>
+</div>
+<button class="pred-btn" onclick="predictIndividual()">&#x26A1; Clasificar Animal</button>
+<div class="result-card" id="result-card">
+  <div class="result-header">
+    <div class="result-badge" id="result-badge"></div>
+    <span class="result-model-tag" id="result-model-tag"></span>
+  </div>
+  <p class="result-desc" id="result-desc"></p>
+  <div class="prob-section-title">Probabilidades por clase</div>
+  <div class="prob-bars" id="prob-bars"></div>
+</div>
+</section>
+<section id="tab-lot" class="tab-panel">
+  <div class="model-sel">
+    <label>Modelo:</label>
+    <button class="mbtn active" onclick="setBatchModel('logistic',this)">Regresi&oacute;n Log&iacute;stica</button>
+    <button class="mbtn" onclick="setBatchModel('neural',this)">Red Neuronal MLP</button>
+  </div>
+  <details class="csv-details">
+    <summary>&#x1F4CB; Formato del CSV &mdash; 16 columnas requeridas (clic para ver)</summary>
+    <table class="csv-col-tbl">
+      <thead><tr><th>#</th><th>Columna</th><th>Descripci&oacute;n</th><th>Valores</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>hair</td><td>Tiene pelo</td><td>0 o 1</td></tr>
+        <tr><td>2</td><td>feathers</td><td>Tiene plumas</td><td>0 o 1</td></tr>
+        <tr><td>3</td><td>eggs</td><td>Pone huevos</td><td>0 o 1</td></tr>
+        <tr><td>4</td><td>milk</td><td>Produce leche</td><td>0 o 1</td></tr>
+        <tr><td>5</td><td>airborne</td><td>Puede volar</td><td>0 o 1</td></tr>
+        <tr><td>6</td><td>aquatic</td><td>Vive en agua</td><td>0 o 1</td></tr>
+        <tr><td>7</td><td>predator</td><td>Es depredador</td><td>0 o 1</td></tr>
+        <tr><td>8</td><td>toothed</td><td>Tiene dientes</td><td>0 o 1</td></tr>
+        <tr><td>9</td><td>backbone</td><td>Tiene columna vertebral</td><td>0 o 1</td></tr>
+        <tr><td>10</td><td>breathes</td><td>Respira aire</td><td>0 o 1</td></tr>
+        <tr><td>11</td><td>venomous</td><td>Es venenoso</td><td>0 o 1</td></tr>
+        <tr><td>12</td><td>fins</td><td>Tiene aletas</td><td>0 o 1</td></tr>
+        <tr><td>13</td><td>legs</td><td>N&uacute;mero de patas</td><td>0,2,4,5,6,8</td></tr>
+        <tr><td>14</td><td>tail</td><td>Tiene cola</td><td>0 o 1</td></tr>
+        <tr><td>15</td><td>domestic</td><td>Es dom&eacute;stico</td><td>0 o 1</td></tr>
+        <tr><td>16</td><td>catsize</td><td>Tama&ntilde;o similar a un gato</td><td>0 o 1</td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:.69rem;color:#166534;margin-top:.45rem">Ejemplo (mam&iacute;fero): <code>1,0,0,1,0,0,1,1,1,1,0,0,4,0,0,1</code></p>
+  </details>
+  <div id="csv-error" class="csv-err"></div>
+  <div class="drop-zone" id="drop-zone">
+    <input type="file" accept=".csv" id="csv-input" onchange="handleFile(this)">
+    <div class="drop-icon">&#x1F4C2;</div>
+    <p>Arrastra tu CSV aqu&iacute; o haz clic para seleccionar</p>
+    <div class="drop-fname" id="fname"></div>
+  </div>
+  <div class="btn-row">
+    <button class="btn-sm" onclick="downloadSample()">&#x2B07; CSV de muestra</button>
+    <button class="btn-go" onclick="predictBatch()">&#x26A1; Clasificar Lote</button>
+  </div>
+  <div class="batch-res" id="batch-res">
+    <div class="met-grid" id="metrics-row"></div>
+    <div class="cm-title">Matriz de Confusi&oacute;n (7 clases)</div>
+    <div class="cm-sub">Obtenida en el conjunto de prueba (20% del dataset)</div>
+    <div id="cm-box"></div>
+    <div class="pred-wrap">
+      <table>
+        <thead><tr><th>#</th><th>Pelo</th><th>Huevos</th><th>Plumas</th><th>Predicci&oacute;n</th><th>Confianza</th></tr></thead>
+        <tbody id="pred-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+</main>
+<div class="method-wrap">
+  <div class="method-box">
+    <h2>&#x1F4CA; Metodolog&iacute;a de Entrenamiento</h2>
+    <div class="method-grid">
+      <div class="mcrd"><div class="mcrd-title">Dataset</div><div class="mcrd-val">Zoo UCI</div><div class="mcrd-sub">101 animales &middot; 16 caracter&iacute;sticas &middot; 7 clases</div></div>
+      <div class="mcrd"><div class="mcrd-title">Divisi&oacute;n Train/Test</div><div class="mcrd-val">80% / 20%</div><div class="mcrd-sub">80 entrenamiento &middot; 21 prueba &middot; random_state=42</div></div>
+      <div class="mcrd"><div class="mcrd-title">Optimizaci&oacute;n</div><div class="mcrd-val">RandomizedSearchCV</div><div class="mcrd-sub">cv=5, n_iter=20, scoring=accuracy</div></div>
+      <div class="mcrd"><div class="mcrd-title">Preprocesamiento</div><div class="mcrd-val">StandardScaler</div><div class="mcrd-sub">Normalizaci&oacute;n: media=0, desv=1</div></div>
+    </div>
+    <div class="two-charts">
+      <div>
+        <div class="chart-title">Comparativa de m&eacute;tricas</div>
+        <div class="bar-legend">
+          <span><span class="dot" style="background:#2563eb"></span>Regresi&oacute;n Log&iacute;stica</span>
+          <span><span class="dot" style="background:#7c3aed"></span>Red Neuronal MLP</span>
+        </div>
+        <div class="bar-group" id="chart-bars"></div>
+      </div>
+      <div>
+        <div class="chart-title">Distribuci&oacute;n del dataset &middot; Zoo UCI (101 animales)</div>
+        <div class="dist-bars">
+          <div class="dist-row"><div class="dist-label">&#x1F43B; Mam&iacute;feros</div><div class="dist-outer"><div class="dist-fill" style="width:40.6%;background:#4CAF50">T1</div></div><div class="dist-count">41</div></div>
+          <div class="dist-row"><div class="dist-label">&#x1F985; Aves</div><div class="dist-outer"><div class="dist-fill" style="width:19.8%;background:#2196F3">T2</div></div><div class="dist-count">20</div></div>
+          <div class="dist-row"><div class="dist-label">&#x1F40D; Reptiles</div><div class="dist-outer"><div class="dist-fill" style="width:5%;background:#795548">T3</div></div><div class="dist-count">5</div></div>
+          <div class="dist-row"><div class="dist-label">&#x1F41F; Peces</div><div class="dist-outer"><div class="dist-fill" style="width:12.9%;background:#00BCD4">T4</div></div><div class="dist-count">13</div></div>
+          <div class="dist-row"><div class="dist-label">&#x1F438; Anfibios</div><div class="dist-outer"><div class="dist-fill" style="width:4%;background:#9C27B0">T5</div></div><div class="dist-count">4</div></div>
+          <div class="dist-row"><div class="dist-label">&#x1F98B; Insectos</div><div class="dist-outer"><div class="dist-fill" style="width:7.9%;background:#FF9800">T6</div></div><div class="dist-count">8</div></div>
+          <div class="dist-row"><div class="dist-label">&#x1F99E; Invertebrados</div><div class="dist-outer"><div class="dist-fill" style="width:9.9%;background:#F44336">T7</div></div><div class="dist-count">10</div></div>
+        </div>
+        <div class="dist-total">Total: 101 animales &middot; UCI Machine Learning Repository</div>
+      </div>
+    </div>
+  </div>
+</div>
+<footer>Proyecto Final &middot; Aprendizaje Autom&aacute;tico &middot; Dataset: Zoo (Repositorio UCI) &middot; 2026</footer>
+<script src="app.js"></script>
+</body>
+</html>
